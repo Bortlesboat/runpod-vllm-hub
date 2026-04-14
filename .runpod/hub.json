@@ -1,0 +1,356 @@
+{
+  "title": "OpenAI-Compatible vLLM Worker",
+  "description": "A RunPod Hub-ready vLLM serverless worker with OpenAI-style chat/completions routing, smoke-test defaults, and presets for 7B through H100-class deployments.",
+  "type": "serverless",
+  "category": "language",
+  "config": {
+    "runsOn": "GPU",
+    "containerDiskInGb": 40,
+    "gpuCount": 1,
+    "gpuIds": "ADA_24,AMPERE_80,ADA_80_PRO",
+    "allowedCudaVersions": [
+      "12.8",
+      "12.7",
+      "12.6",
+      "12.5",
+      "12.4",
+      "12.3",
+      "12.2",
+      "12.1"
+    ],
+    "presets": [
+      {
+        "name": "Smoke Test 125M",
+        "defaults": {
+          "MODEL_NAME": "facebook/opt-125m",
+          "MAX_MODEL_LEN": 2048,
+          "GPU_MEMORY_UTILIZATION": 0.85,
+          "MAX_NUM_SEQS": 32,
+          "TENSOR_PARALLEL_SIZE": 1,
+          "DTYPE": "float16",
+          "DEFAULT_MAX_TOKENS": 128,
+          "MAX_CONCURRENCY": 8
+        }
+      },
+      {
+        "name": "Balanced 7B",
+        "defaults": {
+          "MODEL_NAME": "Qwen/Qwen2.5-7B-Instruct",
+          "MAX_MODEL_LEN": 8192,
+          "GPU_MEMORY_UTILIZATION": 0.9,
+          "MAX_NUM_SEQS": 128,
+          "TENSOR_PARALLEL_SIZE": 1,
+          "DTYPE": "bfloat16",
+          "DEFAULT_MAX_TOKENS": 256,
+          "MAX_CONCURRENCY": 24
+        }
+      },
+      {
+        "name": "H100 / 32B",
+        "defaults": {
+          "MODEL_NAME": "Qwen/Qwen2.5-32B-Instruct",
+          "MAX_MODEL_LEN": 32768,
+          "GPU_MEMORY_UTILIZATION": 0.92,
+          "MAX_NUM_SEQS": 64,
+          "TENSOR_PARALLEL_SIZE": 1,
+          "DTYPE": "bfloat16",
+          "DEFAULT_MAX_TOKENS": 512,
+          "MAX_CONCURRENCY": 16
+        }
+      }
+    ],
+    "env": [
+      {
+        "key": "MODEL_NAME",
+        "input": {
+          "type": "huggingface",
+          "name": "Model",
+          "description": "Hugging Face repo id or local model path for vLLM.",
+          "default": "Qwen/Qwen2.5-7B-Instruct",
+          "required": true
+        }
+      },
+      {
+        "key": "HF_TOKEN",
+        "input": {
+          "type": "string",
+          "name": "Hugging Face token",
+          "description": "Optional access token for gated or private models.",
+          "advanced": true
+        }
+      },
+      {
+        "key": "MAX_MODEL_LEN",
+        "input": {
+          "type": "number",
+          "name": "Max model length",
+          "description": "Context window cap passed to vLLM. Lower this first if you need to save VRAM.",
+          "min": 512,
+          "max": 131072,
+          "default": 8192
+        }
+      },
+      {
+        "key": "GPU_MEMORY_UTILIZATION",
+        "input": {
+          "type": "number",
+          "name": "GPU memory utilization",
+          "description": "Fraction of GPU memory that vLLM is allowed to reserve.",
+          "min": 0.5,
+          "max": 0.99,
+          "default": 0.9
+        }
+      },
+      {
+        "key": "MAX_NUM_SEQS",
+        "input": {
+          "type": "number",
+          "name": "Max sequences",
+          "description": "Maximum concurrent sequences scheduled by vLLM.",
+          "min": 1,
+          "max": 512,
+          "default": 128
+        }
+      },
+      {
+        "key": "TENSOR_PARALLEL_SIZE",
+        "input": {
+          "type": "number",
+          "name": "Tensor parallel size",
+          "description": "Number of GPUs to shard the model across.",
+          "min": 1,
+          "max": 8,
+          "default": 1
+        }
+      },
+      {
+        "key": "DTYPE",
+        "input": {
+          "type": "string",
+          "name": "dtype",
+          "description": "Numerical precision used by vLLM.",
+          "options": [
+            {
+              "label": "Auto",
+              "value": "auto"
+            },
+            {
+              "label": "bfloat16",
+              "value": "bfloat16"
+            },
+            {
+              "label": "float16",
+              "value": "float16"
+            }
+          ],
+          "default": "auto"
+        }
+      },
+      {
+        "key": "TOKENIZER_MODE",
+        "input": {
+          "type": "string",
+          "name": "Tokenizer mode",
+          "description": "Optional tokenizer mode for families like Mistral.",
+          "options": [
+            {
+              "label": "Default",
+              "value": ""
+            },
+            {
+              "label": "mistral",
+              "value": "mistral"
+            }
+          ],
+          "default": "",
+          "advanced": true
+        }
+      },
+      {
+        "key": "CONFIG_FORMAT",
+        "input": {
+          "type": "string",
+          "name": "Config format",
+          "description": "Optional config format override for models like Mistral.",
+          "options": [
+            {
+              "label": "Default",
+              "value": ""
+            },
+            {
+              "label": "mistral",
+              "value": "mistral"
+            }
+          ],
+          "default": "",
+          "advanced": true
+        }
+      },
+      {
+        "key": "LOAD_FORMAT",
+        "input": {
+          "type": "string",
+          "name": "Load format",
+          "description": "Optional load format override for specialized model families.",
+          "options": [
+            {
+              "label": "Default",
+              "value": ""
+            },
+            {
+              "label": "mistral",
+              "value": "mistral"
+            }
+          ],
+          "default": "",
+          "advanced": true
+        }
+      },
+      {
+        "key": "QUANTIZATION",
+        "input": {
+          "type": "string",
+          "name": "Quantization",
+          "description": "Optional quantization mode for supported models.",
+          "options": [
+            {
+              "label": "None",
+              "value": ""
+            },
+            {
+              "label": "AWQ",
+              "value": "awq"
+            },
+            {
+              "label": "GPTQ",
+              "value": "gptq"
+            },
+            {
+              "label": "bitsandbytes",
+              "value": "bitsandbytes"
+            }
+          ],
+          "default": ""
+        }
+      },
+      {
+        "key": "TRUST_REMOTE_CODE",
+        "input": {
+          "type": "boolean",
+          "name": "Trust remote code",
+          "description": "Enable this only for models that require custom code from Hugging Face.",
+          "default": false,
+          "trueValue": "true",
+          "falseValue": "false"
+        }
+      },
+      {
+        "key": "ENABLE_AUTO_TOOL_CHOICE",
+        "input": {
+          "type": "boolean",
+          "name": "Auto tool choice",
+          "description": "Enable vLLM auto tool selection for supported tool-calling models.",
+          "default": false,
+          "trueValue": "true",
+          "falseValue": "false",
+          "advanced": true
+        }
+      },
+      {
+        "key": "TOOL_CALL_PARSER",
+        "input": {
+          "type": "string",
+          "name": "Tool call parser",
+          "description": "Parser selection for tool-calling models.",
+          "options": [
+            {
+              "label": "llama3_json",
+              "value": "llama3_json"
+            },
+            {
+              "label": "hermes",
+              "value": "hermes"
+            },
+            {
+              "label": "mistral",
+              "value": "mistral"
+            },
+            {
+              "label": "granite",
+              "value": "granite"
+            },
+            {
+              "label": "deepseek_v3",
+              "value": "deepseek_v3"
+            }
+          ],
+          "default": "llama3_json",
+          "advanced": true
+        }
+      },
+      {
+        "key": "REASONING_PARSER",
+        "input": {
+          "type": "string",
+          "name": "Reasoning parser",
+          "description": "Optional parser for reasoning-capable model families like DeepSeek-R1.",
+          "options": [
+            {
+              "label": "Default",
+              "value": ""
+            },
+            {
+              "label": "deepseek_r1",
+              "value": "deepseek_r1"
+            }
+          ],
+          "default": "",
+          "advanced": true
+        }
+      },
+      {
+        "key": "ENFORCE_EAGER",
+        "input": {
+          "type": "boolean",
+          "name": "Enforce eager",
+          "description": "Useful for edge-case startup issues on some model and CUDA combinations.",
+          "default": false,
+          "trueValue": "true",
+          "falseValue": "false",
+          "advanced": true
+        }
+      },
+      {
+        "key": "OPENAI_SERVED_MODEL_NAME_OVERRIDE",
+        "input": {
+          "type": "string",
+          "name": "Served model name override",
+          "description": "Optional alias returned by the OpenAI-compatible API.",
+          "advanced": true
+        }
+      },
+      {
+        "key": "DEFAULT_MAX_TOKENS",
+        "input": {
+          "type": "number",
+          "name": "Default max tokens",
+          "description": "Fallback max_tokens used when the request does not specify one.",
+          "min": 16,
+          "max": 4096,
+          "default": 256
+        }
+      },
+      {
+        "key": "MAX_CONCURRENCY",
+        "input": {
+          "type": "number",
+          "name": "Max concurrency",
+          "description": "Maximum number of RunPod handler requests allowed in-flight at once.",
+          "min": 1,
+          "max": 128,
+          "default": 30
+        }
+      }
+    ]
+  }
+}
