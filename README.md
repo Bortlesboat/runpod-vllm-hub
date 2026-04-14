@@ -1,6 +1,20 @@
 # RunPod vLLM Hub Template
 
+[![RunPod](https://api.runpod.io/badge/Bortlesboat/runpod-vllm-hub)](https://console.runpod.io/hub/Bortlesboat/runpod-vllm-hub)
+
 This repo is a practical starter for publishing an OpenAI-compatible `vLLM` worker to the RunPod Hub.
+
+Deploy on RunPod Hub:
+
+- https://console.runpod.io/hub/Bortlesboat/runpod-vllm-hub
+
+Good search terms for this listing:
+
+- `vllm`
+- `openai-compatible`
+- `serverless`
+- `qwen`
+- `runpod`
 
 It does four things:
 

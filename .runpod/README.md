@@ -1,25 +1,18 @@
 # OpenAI-Compatible vLLM Worker
 
-Deploy a configurable `vLLM` serverless worker on RunPod Hub with:
+Deploy a configurable `vLLM` serverless worker on RunPod Hub for OpenAI-style chat and completion APIs.
 
-- OpenAI-style chat and completion routes,
-- presets for `RTX 4090`, `A100`, and `H100`-class deployments,
-- exposed context-window and memory-tuning knobs,
-- a cheap smoke-test profile for Hub validation.
+## Best for
 
-## Input shortcuts
+- teams that want a reusable `vLLM` starter instead of a model-specific worker,
+- users comparing `RTX 4090`, `A100`, and `H100` presets,
+- fast iteration on ungated Hugging Face models such as Qwen instruct variants.
 
-This worker accepts:
+## Request shapes
 
 - `prompt` for `/v1/completions`
 - `messages` for `/v1/chat/completions`
 - `route` + `body` for explicit OpenAI-compatible requests
-
-## Good defaults
-
-- `Smoke Test 125M`: fastest validation path
-- `Balanced 7B`: sensible one-GPU default
-- `H100 / 32B`: larger-context profile for higher-end GPUs
 
 ## Main knobs
 
@@ -30,8 +23,5 @@ This worker accepts:
 - `TENSOR_PARALLEL_SIZE`
 - `DTYPE`
 - `QUANTIZATION`
-- `TOKENIZER_MODE`
-- `CONFIG_FORMAT`
-- `LOAD_FORMAT`
 
-If you hit memory pressure, lower `MAX_MODEL_LEN` first. If you want a faster cold start, use the smoke preset or a smaller default model.
+If you hit memory pressure, lower `MAX_MODEL_LEN` first. If you want the fastest cold start, use the smoke-test preset or a smaller default model.
