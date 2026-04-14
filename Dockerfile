@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=runpod/worker-v1-vllm:v2.14.0
+ARG BASE_IMAGE=runpod/worker-v1-vllm:v2.12.3
 FROM ${BASE_IMAGE}
 
 ENV PYTHONUNBUFFERED=1
